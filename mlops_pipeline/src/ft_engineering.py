@@ -72,6 +72,10 @@ def construir_dataset(ruta=RUTA_DATOS, test_size=0.2, random_state=42):
     df = encodear_variables(df)
 
     # Columnas irrelevantes para el modelo (fechas, ids si existieran)
+    # 'puntaje' se elimina por DATA LEAKAGE: se detectó que separa perfectamente
+    # las clases (0 y 1 de Pago_atiempo) sin superposición de rangos, lo que indica
+    # que es un score recalculado DESPUÉS del resultado de pago, no disponible
+    # al momento real de otorgar el crédito.
     columnas_a_eliminar = ['fecha_prestamo', 'puntaje']
     df = df.drop(columns=[c for c in columnas_a_eliminar if c in df.columns])
     
