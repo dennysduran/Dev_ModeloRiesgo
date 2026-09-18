@@ -13,3 +13,4 @@ xgboost
 pydantic
 fastapi
 uvicorn[standard]
+streamlit==1.64.0
