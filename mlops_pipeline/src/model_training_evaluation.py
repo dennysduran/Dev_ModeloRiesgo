@@ -100,6 +100,11 @@ if __name__ == "__main__":
         modelos_entrenados['Árbol de Decisión'].feature_importances_,
         index=X_train.columns
     )
+    # Guardar el mejor modelo entrenado para uso en producción (model_deploy.py)
+    import joblib
+    joblib.dump(mejor_modelo, 'modelo_riesgo_crediticio.joblib')
+    
+    print(f"\nModelo guardado en: modelo_riesgo_crediticio.joblib")
     print("\n--- Top 10 variables más importantes (Árbol de Decisión) ---")
     print(importancias.sort_values(ascending=False).head(10))
     

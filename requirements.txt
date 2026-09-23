@@ -14,3 +14,4 @@ pydantic
 fastapi
 uvicorn[standard]
 streamlit==1.64.0
+joblib==1.5.3

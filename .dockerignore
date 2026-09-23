@@ -1,0 +1,14 @@
+# .dockerignore
+ProyectoIntegrador/
+venv/
+.venv/
+__pycache__/
+*.pyc 
+.git/
+.gitignore
+.ipynb_checkpoints/
+*.ipynb 
+Base_de_datos.csv
+Base_de_datos.xlsx
+.DS_Store
+Thumbs.db

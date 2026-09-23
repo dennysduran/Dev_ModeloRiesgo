@@ -86,9 +86,36 @@ cd mlops_pipeline/src
 streamlit run app.py
 ```
 
+### 5. Despliegue del modelo (`model_deploy.py` + Docker)
+
+Se expone el modelo entrenado (Random Forest, guardado en `modelo_riesgo_crediticio.joblib`) como un servicio web mediante **FastAPI**, permitiendo que cualquier sistema externo obtenga predicciones sin necesidad de conocer el código interno del pipeline.
+
+**Endpoint principal:**
+- `POST /predict` — recibe uno o varios clientes en formato JSON (soporta predicción por lotes/batch) con sus datos crudos (edad, salario, tipo de crédito, historial crediticio, etc.), aplica internamente el mismo pipeline de limpieza y encoding de `ft_engineering.py`, y devuelve para cada cliente la predicción (`pago_a_tiempo_predicho`) y la probabilidad asociada.
+
+**Documentación interactiva:** al levantar la API, FastAPI genera automáticamente una interfaz de prueba en `/docs` donde se puede probar el endpoint sin herramientas externas.
+
+**Cómo ejecutar la API localmente:**
+```bash
+cd mlops_pipeline/src
+uvicorn model_deploy:app --reload
+```
+Luego abrir `http://127.0.0.1:8000/docs`.
+
+**Contenerización (Docker):** se incluye un `Dockerfile` que empaqueta el código, las dependencias (`requirements.txt`) y el servidor Uvicorn en una imagen autocontenida, permitiendo desplegar la API en cualquier entorno sin configuración manual de Python o librerías.
+
+**Cómo construir y ejecutar la imagen:**
+```bash
+docker build -t riesgo-crediticio-api .
+docker run -p 8000:8000 riesgo-crediticio-api
+```
+
+**Nota:** la imagen no fue construida/probada en el entorno local de desarrollo por una limitación de hardware (virtualización/RAM insuficiente para correr Docker Desktop); el `Dockerfile` y `.dockerignore` fueron diseñados siguiendo las buenas prácticas estándar (imagen base liviana `python:3.11-slim`, orden de capas optimizado para cache, exclusión de archivos innecesarios) y están listos para construirse en cualquier entorno con Docker habilitado.
+
 ## Conclusiones y recomendaciones
 
 - El pipeline es reproducible de punta a punta: cualquier persona que clone el repo, instale `requirements.txt` y ejecute los scripts en orden (`ft_engineering.py` → `model_training_evaluation.py` → `model_monitoring.py`) puede reconstruir el modelo y el monitoreo desde cero.
 - El hallazgo de data leakage refuerza la importancia de validar la disponibilidad temporal real de cada variable antes de incluirla en el modelo, más allá de su poder predictivo aparente.
 - Se recomienda, en un escenario productivo real, reemplazar la simulación de drift por datos reales de nuevos clientes muestreados con una periodicidad definida (ej. mensual), y activar reentrenamiento del modelo cuando el PSI de variables clave supere el umbral de 0.25 de forma sostenida.
+- El modelo queda disponible como servicio mediante una API REST (FastAPI), lista para integrarse con sistemas externos de evaluación de crédito, y empaquetada en una imagen Docker para despliegue portable.
 
